@@ -1,0 +1,25 @@
+{
+  "name": "yunyu-social-cloud",
+  "version": "1.0.0",
+  "private": true,
+  "description": "云屿：简约风社交、跨设备文件传输与云游戏大厅全栈演示",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.js",
+    "dev": "node --watch --env-file-if-exists=.env server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=22.9.0"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "better-sqlite3": "^12.4.1",
+    "cookie-parser": "^1.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^8.2.1",
+    "helmet": "^8.1.0",
+    "multer": "^2.0.2",
+    "socket.io": "^4.8.1"
+  }
+}

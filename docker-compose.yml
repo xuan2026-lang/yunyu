@@ -1,0 +1,24 @@
+services:
+  yunyu:
+    build: .
+    init: true
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOST: 0.0.0.0
+      DATA_DIR: /app/data
+      SEED_DEMO: "0"
+      COOKIE_SECURE: "0"
+      TRUST_PROXY: "0"
+    volumes:
+      - yunyu-data:/app/data
+    security_opt:
+      - no-new-privileges:true
+    stop_grace_period: 30s
+
+volumes:
+  yunyu-data:
+    name: yunyu-data

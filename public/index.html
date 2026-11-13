@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="云屿：聊天、交友、跨设备文件传输与云游戏大厅。">
+  <meta name="theme-color" content="#f4f5f1">
+  <title>云屿 · 与你保持连接</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%233f7161'/%3E%3Cpath d='M17 38c8-1 11-8 15-18 4 10 7 17 15 18-6 2-11 5-15 10-4-5-9-8-15-10Z' fill='white'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/styles.css">
+  <script defer src="/socket.io/socket.io.js"></script>
+  <script defer src="/app.js"></script>
+</head>
+<body>
+  <svg class="svg-sprite" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="i-logo" viewBox="0 0 24 24"><path d="M4 15c3.2-.4 5.4-3.4 8-10 2.6 6.6 4.8 9.6 8 10-3.2.7-5.8 2-8 4-2.2-2-4.8-3.3-8-4Z"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20 15a3 3 0 0 1-3 3H9l-5 3v-6a3 3 0 0 1-1-2V7a3 3 0 0 1 3-3h11a3 3 0 0 1 3 3v8Z"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM16 3.2a4 4 0 0 1 0 7.6M22 20v-2a4 4 0 0 0-3-3.65"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h5l2 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/></symbol>
+    <symbol id="i-game" viewBox="0 0 24 24"><path d="M8 6h8a6 6 0 0 1 5.7 7.8l-1.1 3.4a2.4 2.4 0 0 1-4 1L14 15h-4l-2.6 3.2a2.4 2.4 0 0 1-4-1l-1.1-3.4A6 6 0 0 1 8 6Z"/><path d="M7 10v4M5 12h4M16 11h.01M18 13h.01"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4 20-7Z"/><path d="M22 2 11 13"/></symbol>
+    <symbol id="i-paperclip" viewBox="0 0 24 24"><path d="m21.4 11.6-8.9 8.9a6 6 0 0 1-8.5-8.5l9.6-9.6a4 4 0 0 1 5.7 5.7l-9.6 9.6a2 2 0 0 1-2.8-2.8l8.9-8.9"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M5 21h14"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 15H6L5 6M10 11v5M14 11v5"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4m-5 5 5-5 5 5M4 15v5h16v-5"/></symbol>
+    <symbol id="i-device" viewBox="0 0 24 24"><rect x="2" y="4" width="15" height="11" rx="2"/><path d="M7 20h5M9 15v5M20 8h2v12h-6v-5"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-logout" viewBox="0 0 24 24"><path d="M10 17l5-5-5-5M15 12H3M15 3h5a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-5"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Z"/><path d="M14 2v6h6M8 13h8M8 17h6"/></symbol>
+    <symbol id="i-group" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21v-2a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v2M17 4a4 4 0 0 1 0 8M19 14a5 5 0 0 1 3 4.6V21"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3.5 2.6 5.6 6.1.8-4.5 4.2 1.2 6.1L12 17.3l-5.4 2.9 1.2-6.1L3.3 9.9l6.1-.8Z"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5V12l3 1.8"/></symbol>
+    <symbol id="i-external" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2 6M20 5v6h-6"/></symbol>
+    <symbol id="i-moments" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.2"/><path d="M12 3a9 9 0 0 1 9 9"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M3 8h4l2-3h6l2 3h4v12H3V8Z"/><circle cx="12" cy="14" r="4"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M20.8 8.6c0 4.2-8.8 10-8.8 10s-8.8-5.8-8.8-10a4.7 4.7 0 0 1 8.8-2.3 4.7 4.7 0 0 1 8.8 2.3Z"/></symbol>
+    <symbol id="i-comment" viewBox="0 0 24 24"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H8l-4 3v-5.5A7.5 7.5 0 0 1 11.5 4h1A7.5 7.5 0 0 1 20 11.5Z"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="m4 17 5-5 4 4 2-2 5 5"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 3.5 5.5 3.5 9S14.5 18.5 12 21c-2.5-2.5-3.5-5.5-3.5-9S9.5 5.5 12 3Z"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
+  </svg>
+
+  <div id="app">
+    <section id="auth-view" class="auth-shell">
+      <div class="auth-intro">
+        <div class="brand brand-large"><span class="brand-mark"><svg><use href="#i-logo"/></svg></span><span>云屿</span></div>
+        <div class="auth-intro-copy">
+          <p class="eyebrow">KEEP IN TOUCH, KEEP IT SIMPLE</p>
+          <h1>让联系、文件与热爱，<br>都在同一处。</h1>
+          <p>一个清爽的交流空间。和朋友聊聊，把文件带到另一台设备，也可以随时看看云游戏。</p>
+        </div>
+        <div class="auth-features" aria-label="产品特点">
+          <span><svg><use href="#i-chat"/></svg>私聊与群组</span>
+          <span><svg><use href="#i-device"/></svg>跨设备文件</span>
+          <span><svg><use href="#i-game"/></svg>云游戏大厅</span>
+        </div>
+        <p class="auth-footnote">简单连接，认真保护每一次访问。</p>
+      </div>
+      <div class="auth-panel-wrap">
+        <div class="auth-panel">
+          <div class="auth-mobile-brand brand"><span class="brand-mark"><svg><use href="#i-logo"/></svg></span><span>云屿</span></div>
+          <p class="auth-kicker">欢迎来到云屿</p>
+          <h2 id="auth-title">登录你的账号</h2>
+          <p class="auth-subtitle" id="auth-subtitle">只需要用户名和密码，无需邮箱。</p>
+          <div class="segmented" role="tablist" aria-label="登录或注册">
+            <button id="login-tab" class="segment active" type="button" role="tab" aria-selected="true" data-auth-mode="login">登录</button>
+            <button id="register-tab" class="segment" type="button" role="tab" aria-selected="false" data-auth-mode="register">注册</button>
+          </div>
+          <form id="auth-form" novalidate>
+            <label class="field-label" for="auth-username">用户名</label>
+            <div class="input-wrap"><svg><use href="#i-users"/></svg><input id="auth-username" name="username" type="text" autocomplete="username" maxlength="20" placeholder="输入用户名" required></div>
+            <label class="field-label" for="auth-password">密码</label>
+            <div class="input-wrap"><svg><use href="#i-shield"/></svg><input id="auth-password" name="password" type="password" autocomplete="current-password" maxlength="72" placeholder="输入密码" required></div>
+            <p id="password-hint" class="field-hint" hidden>8–72 个字符，需同时包含英文字母和数字。</p>
+            <p id="auth-error" class="form-error" role="alert" hidden></p>
+            <button id="auth-submit" class="button button-primary button-full" type="submit">登录并进入云屿</button>
+          </form>
+          <div class="demo-account">
+            <div><span class="demo-dot"></span><span>想先逛逛？使用演示账号</span></div>
+            <button id="demo-fill" class="text-button" type="button">填入 demo 账号</button>
+          </div>
+          <p class="auth-terms">登录状态在本设备保留 30 天。请勿在公共设备登录个人账号。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="main-view" class="app-shell" hidden>
+      <aside class="sidebar">
+        <div class="sidebar-brand" aria-label="云屿"><svg><use href="#i-logo"/></svg></div>
+        <nav class="main-nav" aria-label="主导航">
+          <button class="nav-item active" type="button" data-view="chat" aria-label="消息"><svg><use href="#i-chat"/></svg><span>消息</span><span id="nav-unread" class="nav-badge" hidden></span></button>
+          <button class="nav-item" type="button" data-view="contacts" aria-label="联系人"><svg><use href="#i-users"/></svg><span>联系人</span><span id="nav-requests" class="nav-dot" hidden></span></button>
+          <button class="nav-item" type="button" data-view="moments" aria-label="朋友圈"><svg><use href="#i-moments"/></svg><span>朋友圈</span><span id="nav-moments" class="nav-dot" hidden></span></button>
+          <button class="nav-item" type="button" data-view="files" aria-label="文件"><svg><use href="#i-folder"/></svg><span>文件</span></button>
+          <button class="nav-item" type="button" data-view="cloud" aria-label="云游戏"><svg><use href="#i-game"/></svg><span>云游戏</span></button>
+        </nav>
+        <div class="sidebar-user">
+          <button id="user-menu-button" class="avatar avatar-button" type="button" aria-label="账号与退出">云</button>
+          <button id="logout-button" class="sidebar-logout" type="button" aria-label="退出登录"><svg><use href="#i-logout"/></svg><span>退出</span></button>
+        </div>
+      </aside>
+
+      <div class="workspace">
+        <main id="view-container">
+          <section id="view-chat" class="app-view chat-layout" aria-label="消息">
+            <div class="conversation-panel">
+              <header class="panel-header">
+                <div><p class="section-kicker">YOUR SPACE</p><h1>消息</h1></div>
+                <button id="new-group-button" class="icon-button soft" type="button" aria-label="新建群聊" title="新建群聊"><svg><use href="#i-group"/></svg></button>
+              </header>
+              <div class="search-box"><svg><use href="#i-search"/></svg><input id="conversation-search" type="search" placeholder="搜索会话" aria-label="搜索会话"></div>
+              <div id="conversation-list" class="conversation-list"></div>
+            </div>
+            <div class="chat-panel">
+              <div id="chat-empty" class="empty-state chat-empty">
+                <div class="empty-illustration"><svg><use href="#i-chat"/></svg></div>
+                <h2>从一个会话开始</h2>
+                <p>选择左侧会话，或到联系人里找朋友聊聊。</p>
+                <button class="button button-secondary" type="button" data-go-view="contacts">查看联系人</button>
+              </div>
+              <div id="chat-active" class="chat-active" hidden>
+                <header id="chat-header" class="chat-header"></header>
+                <div id="message-list" class="message-list" aria-live="polite"></div>
+                <div class="composer-wrap">
+                  <form id="message-form" class="composer">
+                    <input id="chat-file-input" type="file" hidden>
+                    <button id="chat-attach-button" class="icon-button" type="button" aria-label="发送文件" title="发送文件（最大 25 MB）"><svg><use href="#i-paperclip"/></svg></button>
+                    <textarea id="message-input" rows="1" maxlength="2000" placeholder="输入消息，Enter 发送，Shift + Enter 换行" aria-label="消息内容"></textarea>
+                    <button id="message-send" class="send-button" type="submit" aria-label="发送消息"><svg><use href="#i-send"/></svg></button>
+                  </form>
+                  <p class="composer-hint">文件仅会话成员可下载 · 单文件最大 25 MB</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section id="view-contacts" class="app-view page-view" aria-label="联系人" hidden>
+            <header class="page-header">
+              <div><p class="section-kicker">CONNECTIONS</p><h1>联系人</h1><p>找到朋友，也认识新的伙伴。</p></div>
+              <button id="contacts-new-group" class="button button-secondary" type="button"><svg><use href="#i-group"/></svg>新建群聊</button>
+            </header>
+            <div class="contacts-grid">
+              <section class="content-card add-friend-card">
+                <div class="card-heading"><div><h2>添加好友</h2><p>通过用户名或昵称搜索</p></div><span class="heading-icon"><svg><use href="#i-plus"/></svg></span></div>
+                <form id="add-friend-form" class="add-friend-form">
+                  <div class="search-box"><svg><use href="#i-search"/></svg><input id="friend-search" type="search" autocomplete="off" placeholder="输入完整用户名，如 a_cheng" aria-label="搜索用户"></div>
+                  <button class="button button-primary" type="submit">发送请求</button>
+                </form>
+                <div id="user-search-results" class="user-search-results"></div>
+                <div class="requests-heading"><h3>好友通知</h3><span id="request-count" class="count-label">0 条待处理</span></div>
+                <div id="friend-requests" class="friend-requests"></div>
+              </section>
+              <section class="content-card friends-card">
+                <div class="card-heading"><div><h2>我的好友</h2><p id="friend-summary">0 位好友</p></div><span class="heading-icon"><svg><use href="#i-users"/></svg></span></div>
+                <div id="friends-list" class="friends-list"></div>
+              </section>
+            </div>
+          </section>
+
+          <section id="view-moments" class="app-view page-view moments-page" aria-label="朋友圈" hidden>
+            <header class="page-header">
+              <div><p class="section-kicker">MOMENTS</p><h1>朋友圈</h1><p>分享此刻，也看看朋友的近况。</p></div>
+              <div class="moments-header-actions">
+                <button id="moments-notice-button" class="button button-secondary" type="button" aria-label="查看新消息"><svg><use href="#i-bell"/></svg><span class="moments-notice-label">新消息</span><span id="moments-notice-badge" class="notice-badge" hidden></span></button>
+                <button id="moments-compose-button" class="button button-primary" type="button"><svg><use href="#i-camera"/></svg>发布动态</button>
+              </div>
+            </header>
+            <div class="moments-layout">
+              <div class="moments-main">
+                <section class="moments-cover" aria-label="朋友圈封面">
+                  <div class="moments-cover-art" aria-hidden="true"></div>
+                  <p class="moments-cover-kicker">KEEP IN TOUCH · 云屿</p>
+                  <div id="moments-cover-user" class="moments-cover-user"></div>
+                </section>
+
+                <section id="moment-composer" class="content-card moment-composer" aria-label="发布动态">
+                  <div class="moment-composer-head">
+                    <span id="composer-avatar" class="composer-avatar"></span>
+                    <textarea id="moment-text" rows="3" maxlength="2000" placeholder="这一刻的想法…" aria-label="动态内容"></textarea>
+                  </div>
+                  <div id="moment-image-preview" class="moment-image-preview" hidden></div>
+                  <div class="moment-composer-foot">
+                    <div class="moment-composer-tools">
+                      <input id="moment-image-input" type="file" accept="image/jpeg,image/png,image/gif,image/webp" multiple hidden>
+                      <button id="moment-add-image" class="text-button" type="button"><svg><use href="#i-image"/></svg>添加图片</button>
+                      <label class="moment-visibility" for="moment-visibility"><svg><use href="#i-globe"/></svg>
+                        <select id="moment-visibility" class="plain-select" aria-label="可见范围">
+                          <option value="friends">好友可见</option>
+                          <option value="private">仅自己可见</option>
+                          <option value="public">站内公开</option>
+                        </select>
+                      </label>
+                    </div>
+                    <div class="moment-composer-submit"><span id="moment-count" class="count-label">0 / 2000</span><button id="moment-publish" class="button button-primary button-small" type="button">发布</button></div>
+                  </div>
+                  <p class="moment-composer-hint">最多 9 张图片 · 单张 5 MB · 好友可见的动态不会出现在陌生人页面</p>
+                </section>
+
+                <div class="moments-toolbar">
+                  <div id="moment-filters" class="filter-chips" role="group" aria-label="筛选动态">
+                    <button class="chip active" type="button" data-moment-filter="all">全部</button>
+                    <button class="chip" type="button" data-moment-filter="friends">好友</button>
+                    <button class="chip" type="button" data-moment-filter="mine">我的</button>
+                  </div>
+                  <span id="moments-count" class="count-label"></span>
+                </div>
+                <div id="moments-list" class="moments-list"></div>
+                <div id="moments-empty" class="moments-empty" hidden>
+                  <span class="empty-illustration"><svg><use href="#i-moments"/></svg></span>
+                  <strong>还没有动态</strong>
+                  <p>写下第一条，或先去联系人里加几位好友。</p>
+                </div>
+                <div id="moments-more-wrap" class="moments-more-wrap" hidden><button id="moments-more" class="button button-secondary" type="button">加载更多动态</button></div>
+              </div>
+              <aside class="moments-aside" aria-label="朋友圈说明">
+                <section class="content-card moments-tip">
+                  <div class="card-heading"><div><h2>关于朋友圈</h2><p>只和你想分享的人分享</p></div></div>
+                  <ul class="moments-tip-list">
+                    <li><svg><use href="#i-users"/></svg><span><strong>好友可见</strong>只有互相是好友的人能看见、点赞和评论。</span></li>
+                    <li><svg><use href="#i-lock"/></svg><span><strong>仅自己可见</strong>当作私人日记，任何人都看不到。</span></li>
+                    <li><svg><use href="#i-globe"/></svg><span><strong>站内公开</strong>所有云屿登录用户都能看见。</span></li>
+                    <li><svg><use href="#i-image"/></svg><span><strong>图片按动态鉴权</strong>图片地址不会公开，删掉动态会一并删除图片。</span></li>
+                  </ul>
+                </section>
+                <section class="content-card moments-friends">
+                  <div class="card-heading"><div><h2>好友</h2><p id="moments-friend-summary">0 位好友</p></div></div>
+                  <div id="moments-friends" class="moments-friends-list"></div>
+                </section>
+              </aside>
+            </div>
+          </section>
+
+          <section id="view-files" class="app-view page-view" aria-label="文件" hidden>
+            <header class="page-header">
+              <div><p class="section-kicker">YOUR FILES, EVERYWHERE</p><h1>文件空间</h1><p>在这台设备上传，在另一台设备继续。</p></div>
+              <button id="file-upload-button" class="button button-primary" type="button"><svg><use href="#i-upload"/></svg>上传文件</button>
+            </header>
+            <input id="personal-file-input" type="file" hidden>
+            <section class="storage-card content-card">
+              <div class="storage-top"><div><span class="storage-icon"><svg><use href="#i-device"/></svg></span><div><h2>个人存储</h2><p id="storage-text">正在读取空间使用情况…</p></div></div><span class="security-label"><svg><use href="#i-shield"/></svg>账号隔离</span></div>
+              <div class="storage-track"><div id="storage-bar" class="storage-bar"></div></div>
+            </section>
+            <div id="file-drop-zone" class="file-drop-zone" tabindex="0" role="button" aria-label="选择或拖放文件上传">
+              <svg><use href="#i-upload"/></svg><div><strong>拖放文件到这里</strong><span>或点击选择文件 · 单文件最大 25 MB · 个人空间 200 MB</span></div>
+            </div>
+            <section class="content-card file-list-card">
+              <div class="card-heading"><div><h2>全部文件</h2><p>聊天附件也会显示在这里</p></div><span id="file-count" class="count-label">0 个文件</span></div>
+              <div class="files-toolbar">
+                <div class="search-box"><svg><use href="#i-search"/></svg><input id="file-search" type="search" placeholder="搜索文件名" aria-label="搜索文件"></div>
+                <div class="filter-chips" role="group" aria-label="筛选文件">
+                  <button class="chip active" type="button" data-file-filter="all">全部</button>
+                  <button class="chip" type="button" data-file-filter="personal">个人文件</button>
+                  <button class="chip" type="button" data-file-filter="shared">聊天附件</button>
+                </div>
+              </div>
+              <div id="files-list" class="files-list"></div>
+            </section>
+          </section>
+
+          <section id="view-cloud" class="app-view page-view cloud-page" aria-label="云游戏" hidden>
+            <header class="page-header cloud-heading">
+              <div><p class="section-kicker">PLAY WITHOUT THE WAIT</p><h1>云游戏大厅</h1><p>一个入口，找到你想玩的世界。</p></div>
+              <span class="session-pill"><span></span>网站账号已登录</span>
+            </header>
+
+            <section id="cloud-hero" class="cloud-hero" aria-label="推荐游戏"></section>
+
+            <section class="cloud-notice">
+              <div class="cloud-notice-icon"><svg><use href="#i-shield"/></svg></div>
+              <div><h2>现在就能玩：官方网页版直达</h2><p>四款游戏已接入厂商官方云游戏网页版，点「立即开玩」会在新标签页打开官方页面。游戏账号请在官方页自行登录，云屿不索取也不保存游戏密码。</p></div>
+              <button id="cloud-info-button" class="text-button" type="button">游玩须知与边界</button>
+            </section>
+
+            <div class="cloud-toolbar">
+              <div class="search-box"><svg><use href="#i-search"/></svg><input id="cloud-search" type="search" placeholder="搜索游戏名称或标签" aria-label="搜索游戏"></div>
+              <div id="cloud-filters" class="filter-chips" role="group" aria-label="筛选游戏"></div>
+            </div>
+
+            <section id="cloud-recent-wrap" class="cloud-recent-wrap" aria-label="最近浏览" hidden>
+              <div class="cloud-recent-heading"><span>最近浏览</span><button id="cloud-recent-clear" class="text-button" type="button">清空</button></div>
+              <div id="cloud-recent" class="cloud-recent"></div>
+            </section>
+
+            <div id="games-list" class="games-list"></div>
+            <div id="cloud-empty" class="cloud-empty" hidden>
+              <span class="empty-illustration"><svg><use href="#i-game"/></svg></span>
+              <strong>没有匹配的游戏</strong>
+              <p>换个关键词或筛选条件试试。</p>
+            </div>
+
+            <section class="cloud-steps content-card">
+              <div class="card-heading"><div><h2>三步真正开玩</h2><p>由厂商官方页面完成登录与串流，进度与客户端互通</p></div></div>
+              <div class="steps-grid">
+                <div class="step-item"><span>01</span><div><strong>点「立即开玩」</strong><p>云屿在新标签页打开厂商官方云游戏网页版，可在游戏详情里核对官方域名。</p></div></div>
+                <div class="step-item"><span>02</span><div><strong>登录游戏账号</strong><p>用米哈游通行证 / 库洛通行证在官方页面登录，网站账号不能代替游戏账号。</p></div></div>
+                <div class="step-item"><span>03</span><div><strong>领取时长开玩</strong><p>领取免费时长或购买畅玩卡，按 F11 全屏；画质与时长由官方服务控制。</p></div></div>
+              </div>
+              <p class="cloud-steps-note">官方页面设置了禁止第三方嵌入的安全策略，所以游戏画面在独立标签页运行，这是厂商要求而非功能缺失。若你拥有自建云游戏服务，可配置 <code>CLOUD_GENSHIN_URL</code> 与 <code>CLOUD_GENSHIN_EMBED=1</code>，在站内直接游玩。</p>
+            </section>
+          </section>
+        </main>
+      </div>
+    </section>
+  </div>
+
+  <dialog id="modal" class="modal">
+    <div class="modal-header"><h2 id="modal-title"></h2><button id="modal-close" class="icon-button" type="button" aria-label="关闭"><svg><use href="#i-close"/></svg></button></div>
+    <div id="modal-body" class="modal-body"></div>
+  </dialog>
+  <div id="cloud-launch" class="cloud-launch" role="dialog" aria-modal="true" aria-labelledby="launch-title" hidden></div>
+  <div id="image-viewer" class="image-viewer" role="dialog" aria-modal="true" aria-label="查看图片" hidden>
+    <button id="image-viewer-close" class="image-viewer-close icon-button" type="button" aria-label="关闭图片"><svg><use href="#i-close"/></svg></button>
+    <img id="image-viewer-img" alt="动态图片大图">
+  </div>
+  <div id="toast-region" class="toast-region" aria-live="polite" aria-atomic="true"></div>
+</body>
+</html>
